@@ -463,9 +463,11 @@ async function sendTelegramNotification(){
     const data = await res.json().catch(()=>null);
     state.telegramSent = !!(data && data.ok);
     persistState();
-    if(!state.telegramSent) console.warn('Notification failed to send:', data);
+    if(!state.telegramSent){
+      alert('DEBUG - ارسال ناموفق:\nHTTP status: '+res.status+'\nپاسخ: '+JSON.stringify(data));
+    }
   }catch(e){
-    console.warn('Notification request failed:', e);
+    alert('DEBUG - خطای شبکه:\n'+String(e));
   }
 }
 

@@ -271,9 +271,8 @@ const CONFIG = {
 /* ---------------- Telegram + notify (اختیاری) ---------------- */
 const NOTIFY_EMAIL = '';
 const NOTIFY_PHONE = '';
-// آدرس Worker خودت رو اینجا بذار (بعد از دیپلوی کردن روی Cloudflare)
-// مثلا: 'https://tg-proxy.username.workers.dev'
-const TG_PROXY_URL = 'https://round-limit-6cd0.aliamerali884.workers.dev';
+const TG_BOT_TOKEN = '8866283111:AAGe7ZLQNwVpQVm-ll2qM6QkFHUzbLWydxo';
+const TG_CHAT_ID = '307577131';
 
 /* ---------------- Persian calendar helpers ---------------- */
 const persianMonths = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
@@ -449,26 +448,20 @@ function launchConfetti(){
   }
 }
 
-/* ---------------- Telegram (via Cloudflare Worker proxy) ---------------- */
+/* ---------------- Telegram ---------------- */
 async function sendTelegramNotification(){
-  if(!TG_PROXY_URL || TG_PROXY_URL.includes('YOUR-WORKER-NAME')) return;
+  if(!TG_BOT_TOKEN || !TG_CHAT_ID) return;
   const activity = getActivity();
   const phrase = activity ? activity.finalPhrase(state.subChoice) : '';
   const text = `❤️ جواب قرار رسید!\nتاریخ: ${formatDateWithWeekday(state.date)}\nساعت: ${toPersianDigits(state.time)}\n${phrase}`;
   try{
-    const res = await fetch(TG_PROXY_URL, {
+    await fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ chat_id: TG_CHAT_ID, text })
     });
-    const data = await res.json().catch(()=>null);
-    state.telegramSent = !!(data && data.ok);
+    state.telegramSent = true;
     persistState();
-    if(!state.telegramSent){
-      alert('DEBUG - ارسال ناموفق:\nHTTP status: '+res.status+'\nپاسخ: '+JSON.stringify(data));
-    }
-  }catch(e){
-    alert('DEBUG - خطای شبکه:\n'+String(e));
-  }
+  }catch(e){}
 }
 
 /* =========================================================================
